@@ -1,0 +1,32 @@
+# Anchor / Rust
+target/
+.anchor/
+test-ledger/
+*.so
+
+# Node
+node_modules/
+.pnpm-store/
+
+# Next.js
+apps/web/.next/
+apps/web/out/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDL / keypairs (generated)
+idl/
+*.json.bak
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
