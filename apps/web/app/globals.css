@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-base: #080816;
+    --bg-card: #0d0d22;
+    --bg-card-hover: #13133a;
+    --border: #1a1a3e;
+    --accent-green: #00ff88;
+    --accent-purple: #9945ff;
+    --accent-gold: #ffd700;
+    --text-primary: #e2e8f0;
+    --text-muted: #64748b;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg-base);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1a1a3e;
+    border-radius: 3px;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-[#0d0d22] border border-[#1a1a3e] rounded-xl;
+  }
+
+  .btn-primary {
+    @apply bg-[#9945ff] hover:bg-[#7a35cc] text-white font-semibold px-4 py-2 rounded-lg transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-[#1a1a3e] hover:bg-[#22224e] text-slate-200 font-semibold px-4 py-2 rounded-lg transition-colors border border-[#2a2a5e];
+  }
+
+  .btn-success {
+    @apply bg-[#00aa55] hover:bg-[#00cc66] text-white font-semibold px-4 py-2 rounded-lg transition-colors;
+  }
+
+  .btn-danger {
+    @apply bg-red-700 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-lg transition-colors;
+  }
+
+  .neon-text {
+    @apply text-[#00ff88];
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+  }
+
+  .neon-purple {
+    @apply text-[#9945ff];
+    text-shadow: 0 0 10px rgba(153, 69, 255, 0.5);
+  }
+
+  .bpoly-amount {
+    @apply font-mono text-[#ffd700] font-bold;
+  }
+}
+
+/* Wallet adapter overrides */
+.wallet-adapter-button {
+  background: #9945ff !important;
+  font-family: var(--font-inter) !important;
+  border-radius: 8px !important;
+}
+
+.wallet-adapter-button:hover {
+  background: #7a35cc !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background: #0d0d22 !important;
+  border: 1px solid #1a1a3e !important;
+}
