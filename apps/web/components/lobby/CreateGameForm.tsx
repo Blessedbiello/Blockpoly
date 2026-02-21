@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { PublicKey } from "@solana/web3.js";
 import { useGameActions } from "@/hooks/useGameActions";
 import { gameIdFromString } from "@/lib/pdas";
+import { NFT_COLLECTION } from "@/lib/constants";
 
 // Generate a deterministic game ID from wallet address + timestamp nonce.
 function generateGameId(walletAddress: string): string {
@@ -42,8 +43,7 @@ export function CreateGameForm() {
     setLoading(true);
     try {
       const entryFeeLamports = BigInt(Math.round(entryFee * 1e9));
-      // Use a placeholder NFT collection (Metaplex Core collection created separately).
-      const nftCollection = new PublicKey("11111111111111111111111111111111");
+      const nftCollection = new PublicKey(NFT_COLLECTION);
 
       toast.info("Creating game on-chain…");
       await actions.initializeGame(maxPlayers, entryFeeLamports, nftCollection);
