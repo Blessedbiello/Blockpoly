@@ -5,13 +5,12 @@ import {
   TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createMint,
-  createAssociatedTokenAccount,
   mintTo,
   getAssociatedTokenAddress,
 } from "@solana/spl-token";
 import { assert } from "chai";
 
-const PROGRAM_ID = new PublicKey("Bp1ypXF8ggBd7f6sWuXEsWs8iSU9L3dGAD9DPpAZ7bHm");
+const PROGRAM_ID = new PublicKey("AicXQXhiHgzaxTXpbxYEriXSQdBRQNbqWgcMU1N57q9n");
 const SEED_GAME_STATE    = Buffer.from("game_state");
 const SEED_PLAYER_STATE  = Buffer.from("player_state");
 const SEED_PROPERTY_STATE = Buffer.from("property_state");
@@ -62,9 +61,10 @@ describe("blockpoly", () => {
   let bpolyMint: PublicKey;
   let bankVaultPDA: PublicKey;
   let bankVaultBump: number;
-  let bankAta: PublicKey;
+  let bankAta: PublicKey;           // derived; created by initializeGame
   let gameStatePDA: PublicKey;
-  let gameStateBump: number;
+  let player1Ata: PublicKey;        // created by joinGame (init_if_needed)
+  let player2Ata: PublicKey;
 
   const GID = gameId("test-game-001");
   const DUMMY_NFT_COLLECTION = Keypair.generate().publicKey;
@@ -75,26 +75,21 @@ describe("blockpoly", () => {
     await airdropIfNeeded(connection, player1.publicKey, 5e9);
     await airdropIfNeeded(connection, player2.publicKey, 5e9);
 
-    // Create BPOLY mint
+    // Create BPOLY mint (payer is mint authority for test setup)
     bpolyMint = await createMint(
       connection, payer, payer.publicKey, null, 6, undefined, undefined, TOKEN_PROGRAM_ID
     );
 
-    // Derive bank vault PDA
+    // Derive PDAs
     [bankVaultPDA, bankVaultBump] = findPDA([SEED_BANK_VAULT, Buffer.from(GID)], PROGRAM_ID);
+    [gameStatePDA] = findPDA([SEED_GAME_STATE, Buffer.from(GID)], PROGRAM_ID);
 
-    // Create bank ATA
-    bankAta = await createAssociatedTokenAccount(
-      connection, payer, bpolyMint, bankVaultPDA, true
-    );
+    // Derive bank ATA address (created by initializeGame, not here)
+    bankAta = await getAssociatedTokenAddress(bpolyMint, bankVaultPDA, true);
 
-    // Mint 10M BPOLY to bank
-    await mintTo(
-      connection, payer, bpolyMint, bankAta, payer, BigInt(10_000_000 * 1_000_000)
-    );
-
-    // Derive game state PDA
-    [gameStatePDA, gameStateBump] = findPDA([SEED_GAME_STATE, Buffer.from(GID)], PROGRAM_ID);
+    // Derive player ATAs (created by joinGame via init_if_needed)
+    player1Ata = await getAssociatedTokenAddress(bpolyMint, player1.publicKey);
+    player2Ata = await getAssociatedTokenAddress(bpolyMint, player2.publicKey);
 
     console.log("Setup complete:");
     console.log("  BPOLY Mint:", bpolyMint.toString());
@@ -104,7 +99,7 @@ describe("blockpoly", () => {
 
   // ── initialize_game ────────────────────────────────────────────────────────
 
-  it("initializes a game", async () => {
+  it("initializes a game and mints BPOLY to bank", async () => {
     const tx = await program.methods
       .initializeGame(
         Array.from(GID),
@@ -128,10 +123,20 @@ describe("blockpoly", () => {
 
     console.log("initializeGame tx:", tx);
 
+    // Mint 10M BPOLY to bank vault ATA (bankAta now exists since initializeGame created it)
+    await mintTo(
+      connection,
+      payer,
+      bpolyMint,
+      bankAta,
+      payer,
+      BigInt(10_000_000 * 1_000_000)
+    );
+
     const gameState = await program.account.gameState.fetch(gameStatePDA);
     assert.equal(gameState.playerCount, 0);
     assert.equal(gameState.maxPlayers, 4);
-    assert.equal(gameState.status.waitingForPlayers !== undefined, true);
+    assert.ok(gameState.status.waitingForPlayers !== undefined, "Status should be WaitingForPlayers");
     console.log("  Game status: WaitingForPlayers ✓");
   });
 
@@ -142,7 +147,6 @@ describe("blockpoly", () => {
       [SEED_PLAYER_STATE, Buffer.from(GID), player1.publicKey.toBuffer()],
       PROGRAM_ID
     );
-    const player1Ata = await getAssociatedTokenAddress(bpolyMint, player1.publicKey);
 
     const tx = await program.methods
       .joinGame(Array.from(GID))
@@ -167,8 +171,8 @@ describe("blockpoly", () => {
     const ps = await program.account.playerState.fetch(player1StatePDA);
     assert.equal(ps.playerIndex, 0);
     assert.equal(ps.position, 0);
-    // Starting balance = 1500 BPOLY = 1_500_000_000 micro
-    assert.equal(ps.bpolyBalance.toString(), "1500000000");
+    // STARTING_BALANCE = 1_500 BPOLY × 1_000_000 = 1_500_000_000 micro-units
+    assert.equal(ps.bpolyBalance.toString(), "1500000000", "Player1 should have 1500 BPOLY");
     console.log("  Player1 balance: 1500 BPOLY ✓");
   });
 
@@ -177,7 +181,6 @@ describe("blockpoly", () => {
       [SEED_PLAYER_STATE, Buffer.from(GID), player2.publicKey.toBuffer()],
       PROGRAM_ID
     );
-    const player2Ata = await getAssociatedTokenAddress(bpolyMint, player2.publicKey);
 
     await program.methods
       .joinGame(Array.from(GID))
@@ -198,7 +201,7 @@ describe("blockpoly", () => {
       .rpc();
 
     const gs = await program.account.gameState.fetch(gameStatePDA);
-    assert.equal(gs.playerCount, 2);
+    assert.equal(gs.playerCount, 2, "Player count should be 2");
     console.log("  Player count: 2 ✓");
   });
 
@@ -218,7 +221,7 @@ describe("blockpoly", () => {
       .rpc();
 
     const gs = await program.account.gameState.fetch(gameStatePDA);
-    assert.equal(gs.status.inProgress !== undefined, true, "Game should be InProgress");
+    assert.ok(gs.status.inProgress !== undefined, "Game should be InProgress");
     assert.equal(gs.turnNumber, 1);
     console.log("  Game status: InProgress ✓");
     console.log("  Alpha deck:", gs.alphaCallDeck.slice(0, 4).join(","), "...");
@@ -226,7 +229,7 @@ describe("blockpoly", () => {
 
   // ── request_dice_roll + consume_randomness ─────────────────────────────────
 
-  it("player1 rolls dice (mock VRF)", async () => {
+  it("player1 rolls dice (mock VRF — die1=4, die2=2, land on space 6 Pyth Network)", async () => {
     const [player1StatePDA] = findPDA(
       [SEED_PLAYER_STATE, Buffer.from(GID), player1.publicKey.toBuffer()],
       PROGRAM_ID
@@ -244,10 +247,10 @@ describe("blockpoly", () => {
       .rpc();
 
     let gs = await program.account.gameState.fetch(gameStatePDA);
-    assert.equal(gs.turnPhase.awaitingVrf !== undefined, true, "Should be AwaitingVRF");
+    assert.ok(gs.turnPhase.awaitingVrf !== undefined, "Should be AwaitingVRF");
     console.log("  Phase: AwaitingVRF ✓");
 
-    // consume_randomness (mock: die1=4, die2=2 → total 6, no doubles)
+    // consume_randomness (mock: die1=4, die2=2 → total 6, land on space 6)
     const randomBytes = new Array(32).fill(0);
     randomBytes[0] = 3;  // die1 = (3 % 6) + 1 = 4
     randomBytes[1] = 1;  // die2 = (1 % 6) + 1 = 2
@@ -267,7 +270,7 @@ describe("blockpoly", () => {
 
     assert.equal(ps.position, 6, "Player should be on space 6 (Pyth Network)");
     assert.deepEqual(gs.pendingDice, [4, 2]);
-    assert.equal(gs.turnPhase.landingEffect !== undefined, true);
+    assert.ok(gs.turnPhase.landingEffect !== undefined, "Phase should be LandingEffect");
     console.log(`  Player1 moved to space ${ps.position} (Pyth Network) ✓`);
     console.log("  Phase: LandingEffect ✓");
   });
@@ -279,7 +282,6 @@ describe("blockpoly", () => {
       [SEED_PLAYER_STATE, Buffer.from(GID), player1.publicKey.toBuffer()],
       PROGRAM_ID
     );
-    const player1Ata = await getAssociatedTokenAddress(bpolyMint, player1.publicKey);
 
     await program.methods
       .resolveLanding(Array.from(GID))
@@ -296,25 +298,25 @@ describe("blockpoly", () => {
       .rpc();
 
     const gs = await program.account.gameState.fetch(gameStatePDA);
-    assert.equal(gs.turnPhase.buyDecision !== undefined, true, "Should be BuyDecision");
+    assert.ok(gs.turnPhase.buyDecision !== undefined, "Should be BuyDecision");
     console.log("  Phase: BuyDecision (unowned property) ✓");
   });
 
   // ── buy_property ───────────────────────────────────────────────────────────
 
-  it("player1 buys Pyth Network (space 6)", async () => {
+  it("player1 buys Pyth Network (space 6, price 100 BPOLY)", async () => {
     const [player1StatePDA] = findPDA(
       [SEED_PLAYER_STATE, Buffer.from(GID), player1.publicKey.toBuffer()],
       PROGRAM_ID
     );
-    const player1Ata = await getAssociatedTokenAddress(bpolyMint, player1.publicKey);
     const [propPDA] = findPDA(
       [SEED_PROPERTY_STATE, Buffer.from(GID), Buffer.from([6])],
       PROGRAM_ID
     );
     const dummyNftAsset = Keypair.generate().publicKey;
 
-    const balBefore = (await program.account.playerState.fetch(player1StatePDA)).bpolyBalance;
+    const psBefore = await program.account.playerState.fetch(player1StatePDA);
+    const balBefore = BigInt(psBefore.bpolyBalance.toString());
 
     await program.methods
       .buyProperty(Array.from(GID), 6, dummyNftAsset)
@@ -336,14 +338,91 @@ describe("blockpoly", () => {
     const ps = await program.account.playerState.fetch(player1StatePDA);
     const prop = await program.account.propertyState.fetch(propPDA);
 
-    assert.equal(prop.owner.toString(), player1.publicKey.toString());
-    assert.equal(prop.liquidityPools, 0);
+    assert.equal(prop.owner.toString(), player1.publicKey.toString(), "Property owner should be player1");
+    assert.equal(prop.liquidityPools, 0, "No LPs initially");
     assert.ok(ps.propertiesOwned.includes(6), "Player1 should own space 6");
 
-    const spent = BigInt(balBefore.toString()) - BigInt(ps.bpolyBalance.toString());
+    const spent = balBefore - BigInt(ps.bpolyBalance.toString());
+    // Pyth Network price = 100 BPOLY = 100_000_000 micro-units
     assert.equal(spent.toString(), "100000000", "Should have spent 100 BPOLY");
     console.log("  Pyth Network purchased for 100 BPOLY ✓");
     console.log("  Player1 owns spaces:", ps.propertiesOwned.join(", "));
+  });
+
+  // ── decline_buy + auction ──────────────────────────────────────────────────
+
+  it("player2 rolls, lands on space 1 (BONK), declines to buy → auction", async () => {
+    const [player2StatePDA] = findPDA(
+      [SEED_PLAYER_STATE, Buffer.from(GID), player2.publicKey.toBuffer()],
+      PROGRAM_ID
+    );
+
+    // Roll: die1=1, die2=0 → but die2 must be 1-6, so die2=(0%6)+1=1 → total 2? No.
+    // Actually: die = (byte % 6) + 1 so minimum is 1. Total min = 2, landing on space 2 (Alpha Call).
+    // Let's roll 3+4=7: bytes[0]=2 (die1=3), bytes[1]=3 (die2=4) → land on space 7 (Governance Vote)
+    // That would trigger DrawCard, not BuyDecision. Let's target space 1 (BONK):
+    // Need total = 1, but minimum is 2. So let's pick space 3 (dogwifhat): bytes[0]=1, bytes[1]=1 → 2+2=4? No.
+    // bytes[0]=1 → die1=(1%6)+1=2, bytes[1]=0 → die2=(0%6)+1=1 → total=3 → space 3 (dogwifhat) is a Property ✓
+
+    // requestDiceRoll
+    await program.methods
+      .requestDiceRoll(Array.from(GID))
+      .accounts({
+        player: player2.publicKey,
+        gameState: gameStatePDA,
+        playerState: player2StatePDA,
+      })
+      .signers([player2])
+      .rpc();
+
+    // consumeRandomness: die1=2, die2=1 → total=3 → space 3 (dogwifhat, Brown property)
+    const randomBytes = new Array(32).fill(0);
+    randomBytes[0] = 1; // die1 = (1 % 6) + 1 = 2
+    randomBytes[1] = 0; // die2 = (0 % 6) + 1 = 1
+
+    await program.methods
+      .consumeRandomness(Array.from(GID), randomBytes)
+      .accounts({
+        authority: player2.publicKey,
+        gameState: gameStatePDA,
+        playerState: player2StatePDA,
+      })
+      .signers([player2])
+      .rpc();
+
+    const ps = await program.account.playerState.fetch(player2StatePDA);
+    assert.equal(ps.position, 3, "Player2 should be on space 3 (dogwifhat)");
+
+    // resolveLanding
+    await program.methods
+      .resolveLanding(Array.from(GID))
+      .accounts({
+        player: player2.publicKey,
+        gameState: gameStatePDA,
+        playerState: player2StatePDA,
+        bankVault: bankVaultPDA,
+        bankBpolyAta: bankAta,
+        playerBpolyAta: player2Ata,
+        tokenProgram: TOKEN_PROGRAM_ID,
+      })
+      .signers([player2])
+      .rpc();
+
+    // declineBuy → starts auction
+    await program.methods
+      .declineBuy(Array.from(GID))
+      .accounts({
+        player: player2.publicKey,
+        gameState: gameStatePDA,
+        playerState: player2StatePDA,
+      })
+      .signers([player2])
+      .rpc();
+
+    const gs = await program.account.gameState.fetch(gameStatePDA);
+    assert.ok(gs.auctionSpace !== null, "Auction should be active");
+    assert.equal(gs.auctionSpace, 3, "Auction should be for space 3");
+    console.log("  declineBuy → auction started for space 3 (dogwifhat) ✓");
   });
 
   // ── Summary ────────────────────────────────────────────────────────────────
@@ -352,7 +431,10 @@ describe("blockpoly", () => {
     const gs = await program.account.gameState.fetch(gameStatePDA);
     console.log("\n=== Final state ===");
     console.log("  Turn:", gs.turnNumber);
+    console.log("  Round:", gs.roundNumber);
     console.log("  Players:", gs.playerCount);
     console.log("  Status:", Object.keys(gs.status)[0]);
+    console.log("  Turn phase:", Object.keys(gs.turnPhase)[0]);
+    console.log("  Auction space:", gs.auctionSpace);
   });
 });
