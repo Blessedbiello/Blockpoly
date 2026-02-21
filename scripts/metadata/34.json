@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Nosana",
+  "symbol": "BLKPLY",
+  "description": "Decentralized GPU compute marketplace on Solana.",
+  "image": "ar://blockpoly/nosana.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 34
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Green"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 320
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 28
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 1400
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/nosana.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

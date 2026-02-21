@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Jupiter",
+  "symbol": "BLKPLY",
+  "description": "The best swap aggregator on Solana. JUP governance. $100B+ vol.",
+  "image": "ar://blockpoly/jupiter.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 31
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Green"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 300
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 26
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 1275
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/jupiter.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Tensor",
+  "symbol": "BLKPLY",
+  "description": "The pro NFT trading platform with on-chain AMM.",
+  "image": "ar://blockpoly/tensor.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 19
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Orange"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 200
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 16
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 1000
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/tensor.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

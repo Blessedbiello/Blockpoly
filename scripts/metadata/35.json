@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Mayan Finance",
+  "symbol": "BLKPLY",
+  "description": "Cross-chain swaps and bridging via Wormhole.",
+  "image": "ar://blockpoly/mayan.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 35
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Bridge"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 200
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 25
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 0
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/mayan.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

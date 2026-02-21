@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: BONK",
+  "symbol": "BLKPLY",
+  "description": "The degen dog coin of Solana — 1T supply, infinite memes.",
+  "image": "ar://blockpoly/bonk.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 1
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Brown"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 60
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 2
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 250
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/bonk.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

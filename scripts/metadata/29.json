@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Drift Protocol",
+  "symbol": "BLKPLY",
+  "description": "The perpetuals and spot DEX on Solana. $50B+ volume.",
+  "image": "ar://blockpoly/drift.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 29
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Yellow"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 280
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 24
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 1275
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/drift.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

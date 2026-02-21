@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Backpack",
+  "symbol": "BLKPLY",
+  "description": "The mad lads wallet. xNFTs. Saga mobile. Crypto-native.",
+  "image": "ar://blockpoly/backpack.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 14
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Pink"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 160
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 12
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 900
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/backpack.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

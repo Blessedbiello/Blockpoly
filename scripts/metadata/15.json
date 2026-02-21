@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: deBridge",
+  "symbol": "BLKPLY",
+  "description": "Cross-chain bridging and DLN: zero slippage, native execution.",
+  "image": "ar://blockpoly/debridge.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 15
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Bridge"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 200
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 25
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 0
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/debridge.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

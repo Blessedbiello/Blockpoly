@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Helius",
+  "symbol": "BLKPLY",
+  "description": "The #1 Solana dev platform. RPC, Webhooks, DAS API, Geyser.",
+  "image": "ar://blockpoly/helius.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 37
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Dark Blue"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 350
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 35
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 1500
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/helius.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

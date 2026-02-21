@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Clockwork",
+  "symbol": "BLKPLY",
+  "description": "Automated smart contract scheduler on Solana.",
+  "image": "ar://blockpoly/clockwork.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 9
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Light Blue"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 120
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 8
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 600
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/clockwork.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

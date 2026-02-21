@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Meteora",
+  "symbol": "BLKPLY",
+  "description": "Dynamic liquidity pools. DLMM. The yield machine.",
+  "image": "ar://blockpoly/meteora.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 24
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Red"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 240
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 20
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 1100
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/meteora.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

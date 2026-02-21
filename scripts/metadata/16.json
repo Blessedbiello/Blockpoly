@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Metaplex",
+  "symbol": "BLKPLY",
+  "description": "The NFT standard on Solana. Candy Machine, Core, Bubblegum.",
+  "image": "ar://blockpoly/metaplex.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 16
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Orange"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 180
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 14
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 950
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/metaplex.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

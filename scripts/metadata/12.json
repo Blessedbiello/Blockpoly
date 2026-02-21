@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: QuickNode",
+  "symbol": "BLKPLY",
+  "description": "The premium RPC provider of choice for Solana builders.",
+  "image": "ar://blockpoly/quicknode.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 12
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Utility"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 150
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 0
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 0
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/quicknode.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Magic Eden",
+  "symbol": "BLKPLY",
+  "description": "Solana's #1 NFT marketplace. Cross-chain now.",
+  "image": "ar://blockpoly/magiceden.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 18
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Orange"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 180
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 14
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 950
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/magiceden.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

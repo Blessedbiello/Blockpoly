@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: dogwifhat",
+  "symbol": "BLKPLY",
+  "description": "WIF. A dog. A hat. A billion dollar meme.",
+  "image": "ar://blockpoly/wif.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 3
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Brown"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 60
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 4
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 450
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/wif.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

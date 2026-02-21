@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Switchboard",
+  "symbol": "BLKPLY",
+  "description": "Decentralized oracle network with VRF for on-chain randomness.",
+  "image": "ar://blockpoly/switchboard.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 8
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Light Blue"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 100
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 6
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 550
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/switchboard.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

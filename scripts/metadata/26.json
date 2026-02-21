@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Marginfi",
+  "symbol": "BLKPLY",
+  "description": "The leading lending protocol on Solana. mrgnlend.",
+  "image": "ar://blockpoly/marginfi.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 26
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Yellow"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 260
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 22
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 1200
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/marginfi.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

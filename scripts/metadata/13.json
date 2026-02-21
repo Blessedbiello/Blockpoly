@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Phantom",
+  "symbol": "BLKPLY",
+  "description": "The most-used Solana wallet. 3M+ users. Slick UI.",
+  "image": "ar://blockpoly/phantom.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 13
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Pink"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 140
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 10
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 750
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/phantom.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Pyth Network",
+  "symbol": "BLKPLY",
+  "description": "Real-time price oracles powering Solana DeFi.",
+  "image": "ar://blockpoly/pyth.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 6
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Light Blue"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 100
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 6
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 550
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/pyth.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

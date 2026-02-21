@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Wormhole",
+  "symbol": "BLKPLY",
+  "description": "Cross-chain bridge connecting Solana to every other ecosystem.",
+  "image": "ar://blockpoly/wormhole.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 5
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Bridge"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 200
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 25
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 0
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/wormhole.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

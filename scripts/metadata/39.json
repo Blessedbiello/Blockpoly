@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Solana",
+  "symbol": "BLKPLY",
+  "description": "65,000 TPS. Sub-cent fees. The crown jewel of Blockpoly.",
+  "image": "ar://blockpoly/solana.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 39
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Dark Blue"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 400
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 50
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 2000
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/solana.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

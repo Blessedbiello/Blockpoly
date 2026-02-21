@@ -1,5 +1,6 @@
 export const PROGRAM_ID = "AicXQXhiHgzaxTXpbxYEriXSQdBRQNbqWgcMU1N57q9n";
 export const BPOLY_MINT = "6p3LtZQ9ko2oXRijE6Yb87re5PaoB9dybXxUkB4bGNb6";
+export const NFT_COLLECTION = "8YzHyvcEP8uP1XgK5pUnPh8BgGgskb9xHtiAkxFeJhjZ";
 
 export const SEEDS = {
   GAME_STATE: "game_state",

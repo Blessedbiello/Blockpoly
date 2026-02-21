@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Solflare",
+  "symbol": "BLKPLY",
+  "description": "The DeFi-native Solana wallet since 2020.",
+  "image": "ar://blockpoly/solflare.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 11
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Pink"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 140
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 10
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 750
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/solflare.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Kamino Finance",
+  "symbol": "BLKPLY",
+  "description": "Automated liquidity vaults and lending on Solana.",
+  "image": "ar://blockpoly/kamino.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 27
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Yellow"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 260
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 22
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 1200
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/kamino.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

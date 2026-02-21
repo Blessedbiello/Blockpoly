@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Allbridge",
+  "symbol": "BLKPLY",
+  "description": "Bridging SOL to every chain with stablecoin pools.",
+  "image": "ar://blockpoly/allbridge.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 25
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Bridge"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 200
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 25
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 0
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/allbridge.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

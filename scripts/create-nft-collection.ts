@@ -54,11 +54,9 @@ async function main() {
     uri: COLLECTION_URI,
   };
 
-  fs.writeFileSync(
-    path.join(__dirname, "../.nft-collection.json"),
-    JSON.stringify(output, null, 2)
-  );
-  console.log("Saved to .nft-collection.json");
+  const outPath = path.join(process.cwd(), ".nft-collection.json");
+  fs.writeFileSync(outPath, JSON.stringify(output, null, 2));
+  console.log("Saved to", outPath);
 }
 
 main().catch((e) => {

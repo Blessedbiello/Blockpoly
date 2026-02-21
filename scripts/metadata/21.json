@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Raydium",
+  "symbol": "BLKPLY",
+  "description": "The OG Solana AMM. Concentrated liquidity. Launchpad.",
+  "image": "ar://blockpoly/raydium.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 21
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Red"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 220
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 18
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 1050
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/raydium.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}

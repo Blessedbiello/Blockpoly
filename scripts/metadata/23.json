@@ -1,0 +1,41 @@
+{
+  "name": "Blockpoly: Orca",
+  "symbol": "BLKPLY",
+  "description": "User-friendly AMM with Whirlpools for concentrated liquidity.",
+  "image": "ar://blockpoly/orca.png",
+  "attributes": [
+    {
+      "trait_type": "Space Index",
+      "value": 23
+    },
+    {
+      "trait_type": "Property Group",
+      "value": "Red"
+    },
+    {
+      "trait_type": "Purchase Price",
+      "value": 220
+    },
+    {
+      "trait_type": "Base Rent",
+      "value": 18
+    },
+    {
+      "trait_type": "Max Protocol Rent",
+      "value": 1050
+    },
+    {
+      "trait_type": "Game",
+      "value": "Blockpoly"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "ar://blockpoly/orca.png",
+        "type": "image/png"
+      }
+    ],
+    "category": "image"
+  }
+}
