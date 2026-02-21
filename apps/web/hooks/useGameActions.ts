@@ -582,6 +582,123 @@ export function useGameActions(gameId: string) {
     [walletAddress, gameId, buildAndSend]
   );
 
+  // ── Landing / Card / End-game actions ──────────────────────────────────────
+
+  const resolveLanding = useCallback(async () => {
+    if (!walletAddress) return;
+    try {
+      await buildAndSend(async (program) => {
+        const walletPK = new PublicKey(walletAddress);
+        const [playerPDA] = playerStatePDA(gameIdBytes, walletPK);
+        const [vaultPDA] = bankVaultPDA(gameIdBytes);
+        return program.methods
+          .resolveLanding(Array.from(gameIdBytes))
+          .accounts({
+            player: walletPK,
+            gameState: gamePDA,
+            playerState: playerPDA,
+            bankVault: vaultPDA,
+            bankBpolyAta: bankAta(gameIdBytes, bpolyMint),
+            playerBpolyAta: playerAta(walletPK, bpolyMint),
+            tokenProgram: TOKEN_PROGRAM_ID,
+          })
+          .instruction();
+      });
+    } catch (e) {
+      console.error("resolveLanding:", e);
+    }
+  }, [walletAddress, gameId, buildAndSend]);
+
+  const drawCard = useCallback(async () => {
+    if (!walletAddress) return;
+    try {
+      await buildAndSend(async (program) => {
+        const walletPK = new PublicKey(walletAddress);
+        const [playerPDA] = playerStatePDA(gameIdBytes, walletPK);
+        return program.methods
+          .drawCard(Array.from(gameIdBytes))
+          .accounts({
+            player: walletPK,
+            gameState: gamePDA,
+            playerState: playerPDA,
+          })
+          .instruction();
+      });
+    } catch (e) {
+      console.error("drawCard:", e);
+    }
+  }, [walletAddress, gameId, buildAndSend]);
+
+  const rugpullAttemptDoubles = useCallback(async () => {
+    if (!walletAddress) return;
+    try {
+      await buildAndSend(async (program) => {
+        const walletPK = new PublicKey(walletAddress);
+        const [playerPDA] = playerStatePDA(gameIdBytes, walletPK);
+        const [vaultPDA] = bankVaultPDA(gameIdBytes);
+        return program.methods
+          .rugpullAttemptDoubles(Array.from(gameIdBytes))
+          .accounts({
+            player: walletPK,
+            gameState: gamePDA,
+            playerState: playerPDA,
+            bankVault: vaultPDA,
+            bankBpolyAta: bankAta(gameIdBytes, bpolyMint),
+            playerBpolyAta: playerAta(walletPK, bpolyMint),
+            tokenProgram: TOKEN_PROGRAM_ID,
+          })
+          .instruction();
+      });
+    } catch (e) {
+      console.error("rugpullAttemptDoubles:", e);
+    }
+  }, [walletAddress, gameId, buildAndSend]);
+
+  const claimPrize = useCallback(async () => {
+    if (!walletAddress) return;
+    try {
+      await buildAndSend(async (program) => {
+        const walletPK = new PublicKey(walletAddress);
+        const [playerPDA] = playerStatePDA(gameIdBytes, walletPK);
+        return program.methods
+          .claimPrize(Array.from(gameIdBytes))
+          .accounts({
+            winner: walletPK,
+            gameState: gamePDA,
+            playerState: playerPDA,
+            systemProgram: SystemProgram.programId,
+          })
+          .instruction();
+      });
+    } catch (e) {
+      console.error("claimPrize:", e);
+    }
+  }, [walletAddress, gameId, buildAndSend]);
+
+  const declareBankruptcy = useCallback(
+    async (creditor: string) => {
+      if (!walletAddress) return;
+      try {
+        await buildAndSend(async (program) => {
+          const walletPK = new PublicKey(walletAddress);
+          const creditorPK = new PublicKey(creditor);
+          const [playerPDA] = playerStatePDA(gameIdBytes, walletPK);
+          return program.methods
+            .declareBankruptcy(Array.from(gameIdBytes), creditorPK)
+            .accounts({
+              player: walletPK,
+              gameState: gamePDA,
+              playerState: playerPDA,
+            })
+            .instruction();
+        });
+      } catch (e) {
+        console.error("declareBankruptcy:", e);
+      }
+    },
+    [walletAddress, gameId, buildAndSend]
+  );
+
   // ── Lobby actions (initialize, join, start) ─────────────────────────────────
 
   const initializeGame = useCallback(
@@ -687,11 +804,18 @@ export function useGameActions(gameId: string) {
     // Rug Pull Zone
     rugpullPayBail,
     rugpullUseJailFreeCard,
+    rugpullAttemptDoubles,
+    // Landing / cards
+    resolveLanding,
+    drawCard,
     // Auction
     auctionBid,
     // Trading
     proposeTrade,
     acceptTrade,
     rejectTrade,
+    // End-game
+    claimPrize,
+    declareBankruptcy,
   };
 }
