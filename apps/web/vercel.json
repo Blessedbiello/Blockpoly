@@ -1,0 +1,9 @@
+{
+  "buildCommand": "pnpm build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "env": {
+    "NEXT_PUBLIC_PROGRAM_ID": "AicXQXhiHgzaxTXpbxYEriXSQdBRQNbqWgcMU1N57q9n",
+    "NEXT_PUBLIC_BPOLY_MINT": "6p3LtZQ9ko2oXRijE6Yb87re5PaoB9dybXxUkB4bGNb6"
+  }
+}
