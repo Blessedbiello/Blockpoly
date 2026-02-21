@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use crate::board::{BOARD, SPACE_TYPE_GO_TO_JAIL};
+use crate::board::BOARD;
 use crate::constants::*;
 use crate::errors::BlockpolyError;
 use crate::events::{DiceRolled, RugPullEntered};

@@ -1,7 +1,10 @@
 "use client";
+// Uses framework-kit (@solana/react-hooks) for wallet + client access.
+// Web3.js v1 Connection is created from the RPC endpoint at the web3-compat boundary
+// so Anchor account subscriptions still work while the UI stays kit-native.
 import { useEffect, useCallback } from "react";
-import { useConnection } from "@solana/wallet-adapter-react";
-import { PublicKey, AccountInfo } from "@solana/web3.js";
+import { useSolanaClient } from "@solana/react-hooks";
+import { Connection, PublicKey, AccountInfo } from "@solana/web3.js";
 import { useQuery } from "@tanstack/react-query";
 import { useGameStore } from "@/stores/gameStore";
 import { gameStatePDA, playerStatePDA, propertyStatePDA, gameIdFromString } from "@/lib/pdas";
@@ -15,18 +18,27 @@ const PURCHASABLE_SPACES = BOARD.filter(
     s.type === SPACE_TYPES.UTILITY
 ).map((s) => s.index);
 
+// web3-compat boundary: create a v1 Connection from the kit client's RPC endpoint.
+function useWeb3Connection(): Connection {
+  const client = useSolanaClient();
+  const endpoint =
+    (client.config.endpoint as string | undefined) ??
+    (client.config.rpc as string | undefined) ??
+    "https://api.devnet.solana.com";
+  return new Connection(endpoint, { commitment: "confirmed" });
+}
+
 export function useGame(gameId: string, playerWallets: string[]) {
-  const { connection } = useConnection();
+  const connection = useWeb3Connection();
   const store = useGameStore();
 
   const gameIdBytes = gameIdFromString(gameId);
   const [gamePDA] = gameStatePDA(gameIdBytes);
 
-  // Fetch and subscribe to GameState
+  // Fetch GameState on mount and on demand
   const fetchGameState = useCallback(async () => {
-    const info = await connection.getAccountInfo(gamePDA);
-    return info;
-  }, [connection, gamePDA]);
+    return connection.getAccountInfo(gamePDA);
+  }, [gamePDA.toString()]);
 
   const { data: gameAccountInfo } = useQuery({
     queryKey: ["gameState", gameId],
@@ -36,9 +48,7 @@ export function useGame(gameId: string, playerWallets: string[]) {
 
   // Real-time WebSocket subscription to GameState PDA
   useEffect(() => {
-    const sub = connection.onAccountChange(gamePDA, (info: AccountInfo<Buffer>) => {
-      // Decode and update store (IDL coder needed in full impl)
-      // For now, trigger a re-fetch via query invalidation
+    const sub = connection.onAccountChange(gamePDA, (_info: AccountInfo<Buffer>) => {
       store.addEvent({
         id: Date.now().toString(),
         timestamp: Date.now(),
@@ -46,19 +56,15 @@ export function useGame(gameId: string, playerWallets: string[]) {
         message: "Game state updated",
       });
     });
-
-    return () => {
-      connection.removeAccountChangeListener(sub);
-    };
-  }, [connection, gamePDA]);
+    return () => { connection.removeAccountChangeListener(sub); };
+  }, [gamePDA.toString()]);
 
   // Subscribe to all player PDAs
   useEffect(() => {
     const subs: number[] = [];
-
     for (const wallet of playerWallets) {
       const [playerPDA] = playerStatePDA(gameIdBytes, new PublicKey(wallet));
-      const sub = connection.onAccountChange(playerPDA, (info) => {
+      const sub = connection.onAccountChange(playerPDA, () => {
         store.addEvent({
           id: `${Date.now()}-${wallet}`,
           timestamp: Date.now(),
@@ -69,19 +75,15 @@ export function useGame(gameId: string, playerWallets: string[]) {
       });
       subs.push(sub);
     }
+    return () => { subs.forEach((s) => connection.removeAccountChangeListener(s)); };
+  }, [playerWallets.join(",")]);
 
-    return () => {
-      subs.forEach((s) => connection.removeAccountChangeListener(s));
-    };
-  }, [connection, playerWallets.join(",")]);
-
-  // Subscribe to property PDAs (all 22 purchasable spaces)
+  // Subscribe to property PDAs (all purchasable spaces)
   useEffect(() => {
     const subs: number[] = [];
-
     for (const spaceIndex of PURCHASABLE_SPACES) {
       const [propPDA] = propertyStatePDA(gameIdBytes, spaceIndex);
-      const sub = connection.onAccountChange(propPDA, (info) => {
+      const sub = connection.onAccountChange(propPDA, () => {
         store.addEvent({
           id: `${Date.now()}-prop-${spaceIndex}`,
           timestamp: Date.now(),
@@ -91,11 +93,8 @@ export function useGame(gameId: string, playerWallets: string[]) {
       });
       subs.push(sub);
     }
-
-    return () => {
-      subs.forEach((s) => connection.removeAccountChangeListener(s));
-    };
-  }, [connection, gameId]);
+    return () => { subs.forEach((s) => connection.removeAccountChangeListener(s)); };
+  }, [gameId]);
 
   return {
     gameState: store.gameState,

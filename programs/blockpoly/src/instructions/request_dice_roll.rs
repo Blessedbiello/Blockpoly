@@ -27,7 +27,7 @@ pub struct RequestDiceRoll<'info> {
         mut,
         seeds = [SEED_PLAYER_STATE, &game_id, player.key().as_ref()],
         bump = player_state.bump,
-        has_one = wallet @ BlockpolyError::NotYourTurn,
+        constraint = player_state.wallet == player.key() @ BlockpolyError::NotYourTurn,
     )]
     pub player_state: Account<'info, PlayerState>,
 }

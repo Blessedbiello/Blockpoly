@@ -1,155 +1,160 @@
 "use client";
+// Uses framework-kit (@solana/react-hooks) for wallet access.
+// Anchor program calls cross the web3-compat boundary via anchor-client.ts.
 import { useCallback } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { useWalletConnection, useSolanaClient } from "@solana/react-hooks";
+import { Connection } from "@solana/web3.js";
 import { useGameStore } from "@/stores/gameStore";
-import { gameIdFromString, gameStatePDA, playerStatePDA, propertyStatePDA, bankVaultPDA } from "@/lib/pdas";
+import { gameIdFromString } from "@/lib/pdas";
 
 export function useGameActions(gameId: string) {
-  const { connection } = useConnection();
-  const { publicKey, sendTransaction } = useWallet();
+  const { wallet } = useWalletConnection();
+  const client = useSolanaClient();
   const store = useGameStore();
+
+  // The connected wallet address (kit Address type → string for display/Anchor)
+  const walletAddress = wallet?.account.address ?? null;
 
   const gameIdBytes = gameIdFromString(gameId);
 
-  const withProgram = useCallback(
-    async (fn: (program: any) => Promise<Transaction | null>) => {
-      if (!publicKey) throw new Error("Wallet not connected");
-      // Program instance would be initialized here with IDL
-      // Placeholder: returns null until IDL is available
-      return fn(null);
-    },
-    [publicKey, connection]
-  );
+  // web3-compat boundary: derive web3.js Connection from kit endpoint for Anchor CPIs.
+  const getConnection = useCallback((): Connection => {
+    const endpoint =
+      (client.config.endpoint as string | undefined) ??
+      (client.config.rpc as string | undefined) ??
+      "https://api.devnet.solana.com";
+    return new Connection(endpoint, { commitment: "confirmed" });
+  }, [client]);
 
   const requestDiceRoll = useCallback(async () => {
-    if (!publicKey) return;
+    if (!walletAddress) return;
     try {
       store.addEvent({
         id: Date.now().toString(),
         timestamp: Date.now(),
         type: "dice_request",
         message: "Requesting dice roll...",
-        player: publicKey.toString(),
+        player: walletAddress,
       });
-      // In full impl: build and send request_dice_roll instruction
+      // TODO: build and send request_dice_roll instruction via Anchor program
     } catch (e) {
       console.error("requestDiceRoll error:", e);
     }
-  }, [publicKey, gameId]);
+  }, [walletAddress, gameId]);
 
   const buyProperty = useCallback(
     async (spaceIndex: number) => {
-      if (!publicKey) return;
+      if (!walletAddress) return;
       try {
         store.addEvent({
           id: Date.now().toString(),
           timestamp: Date.now(),
           type: "buy",
           message: `Buying property at space ${spaceIndex}`,
-          player: publicKey.toString(),
+          player: walletAddress,
         });
-        // build buy_property instruction
+        // TODO: build buy_property instruction via Anchor
       } catch (e) {
         console.error("buyProperty error:", e);
       }
     },
-    [publicKey, gameId]
+    [walletAddress, gameId]
   );
 
   const declineBuy = useCallback(async () => {
-    if (!publicKey) return;
-    // build decline_buy instruction → triggers auction
-  }, [publicKey, gameId]);
+    if (!walletAddress) return;
+    // TODO: build decline_buy instruction → triggers auction
+  }, [walletAddress, gameId]);
 
   const payRent = useCallback(
-    async (spaceIndex: number) => {
-      if (!publicKey) return;
-      // build pay_rent instruction
+    async (_spaceIndex: number) => {
+      if (!walletAddress) return;
+      // TODO: build pay_rent instruction
     },
-    [publicKey, gameId]
+    [walletAddress, gameId]
   );
 
   const buildLP = useCallback(
-    async (spaceIndex: number) => {
-      if (!publicKey) return;
-      // build build_lp instruction
+    async (_spaceIndex: number) => {
+      if (!walletAddress) return;
+      // TODO: build build_lp instruction
     },
-    [publicKey, gameId]
+    [walletAddress, gameId]
   );
 
   const buildProtocol = useCallback(
-    async (spaceIndex: number) => {
-      if (!publicKey) return;
-      // build build_protocol instruction
+    async (_spaceIndex: number) => {
+      if (!walletAddress) return;
+      // TODO: build build_protocol instruction
     },
-    [publicKey, gameId]
+    [walletAddress, gameId]
   );
 
   const sellLP = useCallback(
-    async (spaceIndex: number) => {
-      if (!publicKey) return;
+    async (_spaceIndex: number) => {
+      if (!walletAddress) return;
     },
-    [publicKey, gameId]
+    [walletAddress, gameId]
   );
 
   const mortgageProperty = useCallback(
-    async (spaceIndex: number) => {
-      if (!publicKey) return;
+    async (_spaceIndex: number) => {
+      if (!walletAddress) return;
     },
-    [publicKey, gameId]
+    [walletAddress, gameId]
   );
 
   const unmortgageProperty = useCallback(
-    async (spaceIndex: number) => {
-      if (!publicKey) return;
+    async (_spaceIndex: number) => {
+      if (!walletAddress) return;
     },
-    [publicKey, gameId]
+    [walletAddress, gameId]
   );
 
   const rugpullPayBail = useCallback(async () => {
-    if (!publicKey) return;
-  }, [publicKey, gameId]);
+    if (!walletAddress) return;
+  }, [walletAddress, gameId]);
 
   const rugpullUseJailFreeCard = useCallback(async () => {
-    if (!publicKey) return;
-  }, [publicKey, gameId]);
+    if (!walletAddress) return;
+  }, [walletAddress, gameId]);
 
   const auctionBid = useCallback(
-    async (spaceIndex: number, amount: bigint) => {
-      if (!publicKey) return;
+    async (_spaceIndex: number, _amount: bigint) => {
+      if (!walletAddress) return;
     },
-    [publicKey, gameId]
+    [walletAddress, gameId]
   );
 
   const proposeTrade = useCallback(
-    async (params: {
+    async (_params: {
       recipient: string;
       offeredProperties: number[];
       offeredBpoly: bigint;
       requestedProperties: number[];
       requestedBpoly: bigint;
     }) => {
-      if (!publicKey) return;
+      if (!walletAddress) return;
     },
-    [publicKey, gameId]
+    [walletAddress, gameId]
   );
 
   const acceptTrade = useCallback(
-    async (proposerWallet: string) => {
-      if (!publicKey) return;
+    async (_proposerWallet: string) => {
+      if (!walletAddress) return;
     },
-    [publicKey, gameId]
+    [walletAddress, gameId]
   );
 
   const rejectTrade = useCallback(
-    async (proposerWallet: string) => {
-      if (!publicKey) return;
+    async (_proposerWallet: string) => {
+      if (!walletAddress) return;
     },
-    [publicKey, gameId]
+    [walletAddress, gameId]
   );
 
   return {
+    walletAddress,
     requestDiceRoll,
     buyProperty,
     declineBuy,

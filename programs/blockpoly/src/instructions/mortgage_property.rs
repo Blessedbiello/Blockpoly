@@ -21,7 +21,7 @@ pub struct MortgageProperty<'info> {
     #[account(
         seeds = [SEED_PLAYER_STATE, &game_id, player.key().as_ref()],
         bump = player_state.bump,
-        has_one = wallet @ BlockpolyError::NotPropertyOwner,
+        constraint = player_state.wallet == player.key() @ BlockpolyError::NotPropertyOwner,
     )]
     pub player_state: Account<'info, PlayerState>,
 
@@ -29,7 +29,7 @@ pub struct MortgageProperty<'info> {
         mut,
         seeds = [SEED_PROPERTY_STATE, &game_id, &[space_index]],
         bump = property_state.bump,
-        has_one = owner @ BlockpolyError::NotPropertyOwner,
+        constraint = property_state.owner == player.key() @ BlockpolyError::NotPropertyOwner,
     )]
     pub property_state: Account<'info, PropertyState>,
 

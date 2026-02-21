@@ -20,7 +20,7 @@ pub struct ClaimPrize<'info> {
     #[account(
         seeds = [SEED_PLAYER_STATE, &game_id, winner.key().as_ref()],
         bump = player_state.bump,
-        has_one = wallet @ BlockpolyError::NotPropertyOwner,
+        constraint = player_state.wallet == winner.key() @ BlockpolyError::NotPropertyOwner,
     )]
     pub player_state: Account<'info, PlayerState>,
 
@@ -28,21 +28,19 @@ pub struct ClaimPrize<'info> {
 }
 
 pub fn handler(ctx: Context<ClaimPrize>, game_id: [u8; 32]) -> Result<()> {
-    let game = &mut ctx.accounts.game_state;
-
-    require!(game.status == GameStatus::Finished, BlockpolyError::GameNotStarted);
+    require!(ctx.accounts.game_state.status == GameStatus::Finished, BlockpolyError::GameNotStarted);
     require!(
-        game.winner == Some(ctx.accounts.winner.key()),
+        ctx.accounts.game_state.winner == Some(ctx.accounts.winner.key()),
         BlockpolyError::NotPropertyOwner
     );
 
-    let prize = game.prize_pool_lamports;
+    let prize = ctx.accounts.game_state.prize_pool_lamports;
 
     // Transfer SOL prize from game_state account to winner
     if prize > 0 {
         **ctx.accounts.game_state.to_account_info().try_borrow_mut_lamports()? -= prize;
         **ctx.accounts.winner.to_account_info().try_borrow_mut_lamports()? += prize;
-        game.prize_pool_lamports = 0;
+        ctx.accounts.game_state.prize_pool_lamports = 0;
     }
 
     emit!(GameWon {

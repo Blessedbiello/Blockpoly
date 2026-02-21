@@ -1,34 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useWalletConnection } from "@solana/react-hooks";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export function CreateGameForm() {
-  const { publicKey } = useWallet();
+  const { wallet, connectors, connect } = useWalletConnection();
+  const walletAddress = wallet?.account.address ?? null;
   const router = useRouter();
   const [maxPlayers, setMaxPlayers] = useState(4);
   const [entryFee, setEntryFee] = useState(0.01);
   const [loading, setLoading] = useState(false);
 
   const handleCreate = async () => {
-    if (!publicKey) {
+    if (!walletAddress) {
       toast.error("Connect your wallet first");
       return;
     }
 
     setLoading(true);
     try {
-      // Generate game ID from timestamp + pubkey
+      // Generate game ID from timestamp + wallet address
       const gameIdBytes = new Uint8Array(32);
       const ts = Date.now().toString();
       const encoder = new TextEncoder();
       const tsBytes = encoder.encode(ts.slice(-8));
       gameIdBytes.set(tsBytes);
-      const walletBytes = publicKey.toBytes().slice(0, 24);
-      gameIdBytes.set(walletBytes, 8);
+      // encode first 24 bytes of wallet address string
+      const addrBytes = encoder.encode(walletAddress.slice(0, 24));
+      gameIdBytes.set(addrBytes, 8);
 
       const gameIdStr = Buffer.from(gameIdBytes).toString("hex").slice(0, 16);
 
@@ -52,12 +53,20 @@ export function CreateGameForm() {
         </p>
       </div>
 
-      {!publicKey ? (
+      {!walletAddress ? (
         <div className="text-center py-4">
           <p className="text-slate-400 text-sm mb-3">
             Connect your wallet to create a game
           </p>
-          <WalletMultiButton />
+          {connectors.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => connect(c.id)}
+              className="btn-primary"
+            >
+              Connect {c.name}
+            </button>
+          ))}
         </div>
       ) : (
         <div className="space-y-4">

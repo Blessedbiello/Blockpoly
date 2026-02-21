@@ -1,7 +1,6 @@
 "use client";
 
-import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useWalletConnection } from "@solana/react-hooks";
 import { useGameStore } from "@/stores/gameStore";
 import { useGameActions } from "@/hooks/useGameActions";
 import { BOARD } from "@/lib/board-data";
@@ -22,19 +21,17 @@ const TURN_PHASE_LABELS: Record<number, string> = {
 };
 
 export function GamePanel({ gameId }: GamePanelProps) {
-  const { publicKey } = useWallet();
-  const { gameState, playerStates, myWallet } = useGameStore();
+  const { wallet } = useWalletConnection();
+  const walletAddress = wallet?.account.address ?? null;
+  const { gameState, playerStates } = useGameStore();
   const actions = useGameActions(gameId);
 
-  const myState = publicKey
-    ? playerStates.get(publicKey.toString())
-    : undefined;
+  const myState = walletAddress ? playerStates.get(walletAddress) : undefined;
 
   const isMyTurn =
     gameState &&
-    publicKey &&
-    gameState.players[gameState.currentPlayerIndex]?.toString() ===
-      publicKey.toString();
+    walletAddress &&
+    gameState.players[gameState.currentPlayerIndex]?.toString() === walletAddress;
 
   const currentPosition = myState?.position ?? 0;
   const currentSpace = BOARD[currentPosition];
@@ -42,8 +39,10 @@ export function GamePanel({ gameId }: GamePanelProps) {
 
   return (
     <div className="card p-4 space-y-4 h-fit">
-      {/* Wallet */}
-      <WalletMultiButton className="w-full !text-sm" />
+      {/* Wallet address display */}
+      <div className="text-xs text-slate-500 font-mono truncate">
+        {walletAddress ? `${walletAddress.slice(0, 8)}…${walletAddress.slice(-4)}` : "Not connected"}
+      </div>
 
       {/* Game info */}
       {gameState && (

@@ -22,7 +22,7 @@ pub struct StartGame<'info> {
 pub fn handler(
     ctx: Context<StartGame>,
     game_id: [u8; 32],
-    /// VRF seed used to shuffle the card decks (provided by host after requesting VRF)
+    // VRF seed used to shuffle the card decks (provided by host after requesting VRF)
     shuffle_seed: [u8; 32],
 ) -> Result<()> {
     let game = &mut ctx.accounts.game_state;

@@ -25,7 +25,7 @@ pub struct ResolveCard<'info> {
         mut,
         seeds = [SEED_PLAYER_STATE, &game_id, player.key().as_ref()],
         bump = player_state.bump,
-        has_one = wallet @ BlockpolyError::NotYourTurn,
+        constraint = player_state.wallet == player.key() @ BlockpolyError::NotYourTurn,
     )]
     pub player_state: Account<'info, PlayerState>,
 
@@ -52,73 +52,60 @@ pub fn handler(
     game_id: [u8; 32],
     deck_type: u8, // 0 = alpha_call, 1 = governance
     card_id: u8,   // 0-15
-    /// Additional parameters for cards that need them (e.g., last dice roll, LP counts)
+    // Additional parameters for cards that need them (e.g., last dice roll, LP counts)
     extra_param: u64,
 ) -> Result<()> {
-    let game = &mut ctx.accounts.game_state;
-    let player = &mut ctx.accounts.player_state;
-
-    require!(game.status == GameStatus::InProgress, BlockpolyError::GameNotStarted);
-    require!(
-        game.current_player_index == player.player_index,
-        BlockpolyError::NotYourTurn
-    );
+    {
+        let game = &ctx.accounts.game_state;
+        let player = &ctx.accounts.player_state;
+        require!(game.status == GameStatus::InProgress, BlockpolyError::GameNotStarted);
+        require!(
+            game.current_player_index == player.player_index,
+            BlockpolyError::NotYourTurn
+        );
+    }
 
     let bank_vault_bump = ctx.bumps.bank_vault;
     let signer_seeds: &[&[&[u8]]] = &[&[SEED_BANK_VAULT, &game_id, &[bank_vault_bump]]];
 
-    let transfer_to_player = |amount: u64| -> CpiContext<Transfer> {
-        CpiContext::new_with_signer(
-            ctx.accounts.token_program.to_account_info(),
-            Transfer {
-                from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                authority: ctx.accounts.bank_vault.to_account_info(),
-            },
-            signer_seeds,
-        )
-    };
-
-    let transfer_to_bank = |amount: u64| -> CpiContext<Transfer> {
-        CpiContext::new(
-            ctx.accounts.token_program.to_account_info(),
-            Transfer {
-                from: ctx.accounts.player_bpoly_ata.to_account_info(),
-                to: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                authority: ctx.accounts.player.to_account_info(),
-            },
-        )
-    };
-
     let effect_desc = if deck_type == 0 {
         resolve_alpha_call(
             card_id,
-            game,
-            player,
-            &ctx,
+            &mut ctx.accounts.game_state,
+            &mut ctx.accounts.player_state,
+            &ctx.accounts.token_program,
+            &ctx.accounts.bank_bpoly_ata,
+            &ctx.accounts.player_bpoly_ata,
+            &ctx.accounts.bank_vault,
+            &ctx.accounts.player,
             extra_param,
             signer_seeds,
         )?
     } else {
         resolve_governance_vote(
             card_id,
-            game,
-            player,
-            &ctx,
+            &mut ctx.accounts.game_state,
+            &mut ctx.accounts.player_state,
+            &ctx.accounts.token_program,
+            &ctx.accounts.bank_bpoly_ata,
+            &ctx.accounts.player_bpoly_ata,
+            &ctx.accounts.bank_vault,
+            &ctx.accounts.player,
             extra_param,
             signer_seeds,
         )?
     };
 
+    let player_key = ctx.accounts.player.key();
     emit!(CardResolved {
         game_id,
-        player: ctx.accounts.player.key(),
+        player: player_key,
         card_id,
         effect: effect_desc.to_string(),
     });
 
-    game.pending_dice = None;
-    game.advance_turn();
+    ctx.accounts.game_state.pending_dice = None;
+    ctx.accounts.game_state.advance_turn();
 
     Ok(())
 }
@@ -127,7 +114,11 @@ fn resolve_alpha_call<'info>(
     card_id: u8,
     game: &mut GameState,
     player: &mut PlayerState,
-    ctx: &Context<ResolveCard<'info>>,
+    token_program: &Program<'info, Token>,
+    bank_bpoly_ata: &Account<'info, TokenAccount>,
+    player_bpoly_ata: &Account<'info, TokenAccount>,
+    bank_vault: &UncheckedAccount<'info>,
+    player_signer: &Signer<'info>,
     extra_param: u64,
     signer_seeds: &[&[&[u8]]],
 ) -> Result<&'static str> {
@@ -137,11 +128,11 @@ fn resolve_alpha_call<'info>(
             // Advance to Genesis Block, collect 200 BPOLY
             player.position = SPACE_GENESIS;
             let cpi_ctx = CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
+                token_program.to_account_info(),
                 Transfer {
-                    from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                    to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                    authority: ctx.accounts.bank_vault.to_account_info(),
+                    from: bank_bpoly_ata.to_account_info(),
+                    to: player_bpoly_ata.to_account_info(),
+                    authority: bank_vault.to_account_info(),
                 },
                 signer_seeds,
             );
@@ -162,11 +153,11 @@ fn resolve_alpha_call<'info>(
             let passed = player.position < old_pos && old_pos != 0;
             if passed {
                 let cpi_ctx = CpiContext::new_with_signer(
-                    ctx.accounts.token_program.to_account_info(),
+                    token_program.to_account_info(),
                     Transfer {
-                        from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                        to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                        authority: ctx.accounts.bank_vault.to_account_info(),
+                        from: bank_bpoly_ata.to_account_info(),
+                        to: player_bpoly_ata.to_account_info(),
+                        authority: bank_vault.to_account_info(),
                     },
                     signer_seeds,
                 );
@@ -188,11 +179,11 @@ fn resolve_alpha_call<'info>(
             if old_pos > 5 {
                 // passed genesis
                 let cpi_ctx = CpiContext::new_with_signer(
-                    ctx.accounts.token_program.to_account_info(),
+                    token_program.to_account_info(),
                     Transfer {
-                        from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                        to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                        authority: ctx.accounts.bank_vault.to_account_info(),
+                        from: bank_bpoly_ata.to_account_info(),
+                        to: player_bpoly_ata.to_account_info(),
+                        authority: bank_vault.to_account_info(),
                     },
                     signer_seeds,
                 );
@@ -205,11 +196,11 @@ fn resolve_alpha_call<'info>(
             // Staking Rewards: collect 50 BPOLY
             let amount = 50_000_000u64;
             let cpi_ctx = CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
+                token_program.to_account_info(),
                 Transfer {
-                    from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                    to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                    authority: ctx.accounts.bank_vault.to_account_info(),
+                    from: bank_bpoly_ata.to_account_info(),
+                    to: player_bpoly_ata.to_account_info(),
+                    authority: bank_vault.to_account_info(),
                 },
                 signer_seeds,
             );
@@ -228,11 +219,11 @@ fn resolve_alpha_call<'info>(
             // extra_param = last dice roll total
             let toll = extra_param.saturating_mul(4_000_000);
             let cpi_ctx = CpiContext::new(
-                ctx.accounts.token_program.to_account_info(),
+                token_program.to_account_info(),
                 Transfer {
-                    from: ctx.accounts.player_bpoly_ata.to_account_info(),
-                    to: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                    authority: ctx.accounts.player.to_account_info(),
+                    from: player_bpoly_ata.to_account_info(),
+                    to: bank_bpoly_ata.to_account_info(),
+                    authority: player_signer.to_account_info(),
                 },
             );
             token::transfer(cpi_ctx, toll)?;
@@ -244,11 +235,11 @@ fn resolve_alpha_call<'info>(
             let loss = player.bpoly_balance / 5;
             if loss > 0 {
                 let cpi_ctx = CpiContext::new(
-                    ctx.accounts.token_program.to_account_info(),
+                    token_program.to_account_info(),
                     Transfer {
-                        from: ctx.accounts.player_bpoly_ata.to_account_info(),
-                        to: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                        authority: ctx.accounts.player.to_account_info(),
+                        from: player_bpoly_ata.to_account_info(),
+                        to: bank_bpoly_ata.to_account_info(),
+                        authority: player_signer.to_account_info(),
                     },
                 );
                 token::transfer(cpi_ctx, loss)?;
@@ -271,11 +262,11 @@ fn resolve_alpha_call<'info>(
             let amount = game.last_rent_amount;
             if amount > 0 {
                 let cpi_ctx = CpiContext::new_with_signer(
-                    ctx.accounts.token_program.to_account_info(),
+                    token_program.to_account_info(),
                     Transfer {
-                        from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                        to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                        authority: ctx.accounts.bank_vault.to_account_info(),
+                        from: bank_bpoly_ata.to_account_info(),
+                        to: player_bpoly_ata.to_account_info(),
+                        authority: bank_vault.to_account_info(),
                     },
                     signer_seeds,
                 );
@@ -289,11 +280,11 @@ fn resolve_alpha_call<'info>(
             // Flash Loan: receive 200 BPOLY now
             require!(!player.flash_loan_active, BlockpolyError::FlashLoanAlreadyActive);
             let cpi_ctx = CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
+                token_program.to_account_info(),
                 Transfer {
-                    from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                    to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                    authority: ctx.accounts.bank_vault.to_account_info(),
+                    from: bank_bpoly_ata.to_account_info(),
+                    to: player_bpoly_ata.to_account_info(),
+                    authority: bank_vault.to_account_info(),
                 },
                 signer_seeds,
             );
@@ -349,7 +340,11 @@ fn resolve_governance_vote<'info>(
     card_id: u8,
     game: &mut GameState,
     player: &mut PlayerState,
-    ctx: &Context<ResolveCard<'info>>,
+    token_program: &Program<'info, Token>,
+    bank_bpoly_ata: &Account<'info, TokenAccount>,
+    player_bpoly_ata: &Account<'info, TokenAccount>,
+    bank_vault: &UncheckedAccount<'info>,
+    player_signer: &Signer<'info>,
     extra_param: u64,
     signer_seeds: &[&[&[u8]]],
 ) -> Result<&'static str> {
@@ -357,11 +352,11 @@ fn resolve_governance_vote<'info>(
         0 => {
             // Protocol Treasury Release: collect 200 BPOLY
             let cpi_ctx = CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
+                token_program.to_account_info(),
                 Transfer {
-                    from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                    to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                    authority: ctx.accounts.bank_vault.to_account_info(),
+                    from: bank_bpoly_ata.to_account_info(),
+                    to: player_bpoly_ata.to_account_info(),
+                    authority: bank_vault.to_account_info(),
                 },
                 signer_seeds,
             );
@@ -372,11 +367,11 @@ fn resolve_governance_vote<'info>(
         1 => {
             // Validator Node Income: collect 100 BPOLY
             let cpi_ctx = CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
+                token_program.to_account_info(),
                 Transfer {
-                    from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                    to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                    authority: ctx.accounts.bank_vault.to_account_info(),
+                    from: bank_bpoly_ata.to_account_info(),
+                    to: player_bpoly_ata.to_account_info(),
+                    authority: bank_vault.to_account_info(),
                 },
                 signer_seeds,
             );
@@ -392,11 +387,11 @@ fn resolve_governance_vote<'info>(
             let total = per_player.saturating_mul(game.player_count.saturating_sub(1) as u64);
             if total > 0 {
                 let cpi_ctx = CpiContext::new_with_signer(
-                    ctx.accounts.token_program.to_account_info(),
+                    token_program.to_account_info(),
                     Transfer {
-                        from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                        to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                        authority: ctx.accounts.bank_vault.to_account_info(),
+                        from: bank_bpoly_ata.to_account_info(),
+                        to: player_bpoly_ata.to_account_info(),
+                        authority: bank_vault.to_account_info(),
                     },
                     signer_seeds,
                 );
@@ -426,11 +421,11 @@ fn resolve_governance_vote<'info>(
         5 => {
             // Gas Fee Rebate: collect 50 BPOLY
             let cpi_ctx = CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
+                token_program.to_account_info(),
                 Transfer {
-                    from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                    to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                    authority: ctx.accounts.bank_vault.to_account_info(),
+                    from: bank_bpoly_ata.to_account_info(),
+                    to: player_bpoly_ata.to_account_info(),
+                    authority: bank_vault.to_account_info(),
                 },
                 signer_seeds,
             );
@@ -447,11 +442,11 @@ fn resolve_governance_vote<'info>(
                 + protocol_count.saturating_mul(115_000_000);
             if levy > 0 {
                 let cpi_ctx = CpiContext::new(
-                    ctx.accounts.token_program.to_account_info(),
+                    token_program.to_account_info(),
                     Transfer {
-                        from: ctx.accounts.player_bpoly_ata.to_account_info(),
-                        to: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                        authority: ctx.accounts.player.to_account_info(),
+                        from: player_bpoly_ata.to_account_info(),
+                        to: bank_bpoly_ata.to_account_info(),
+                        authority: player_signer.to_account_info(),
                     },
                 );
                 token::transfer(cpi_ctx, levy)?;
@@ -462,11 +457,11 @@ fn resolve_governance_vote<'info>(
         7 => {
             // Protocol Upgrade Vote: pay 100 BPOLY
             let cpi_ctx = CpiContext::new(
-                ctx.accounts.token_program.to_account_info(),
+                token_program.to_account_info(),
                 Transfer {
-                    from: ctx.accounts.player_bpoly_ata.to_account_info(),
-                    to: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                    authority: ctx.accounts.player.to_account_info(),
+                    from: player_bpoly_ata.to_account_info(),
+                    to: bank_bpoly_ata.to_account_info(),
+                    authority: player_signer.to_account_info(),
                 },
             );
             token::transfer(cpi_ctx, 100_000_000)?;
@@ -479,11 +474,11 @@ fn resolve_governance_vote<'info>(
             let rewards = lp_count.saturating_mul(25_000_000);
             if rewards > 0 {
                 let cpi_ctx = CpiContext::new_with_signer(
-                    ctx.accounts.token_program.to_account_info(),
+                    token_program.to_account_info(),
                     Transfer {
-                        from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                        to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                        authority: ctx.accounts.bank_vault.to_account_info(),
+                        from: bank_bpoly_ata.to_account_info(),
+                        to: player_bpoly_ata.to_account_info(),
+                        authority: bank_vault.to_account_info(),
                     },
                     signer_seeds,
                 );
@@ -497,11 +492,11 @@ fn resolve_governance_vote<'info>(
             let amount = 150_000_000u64.saturating_mul(game.player_count.saturating_sub(1) as u64);
             if amount > 0 {
                 let cpi_ctx = CpiContext::new(
-                    ctx.accounts.token_program.to_account_info(),
+                    token_program.to_account_info(),
                     Transfer {
-                        from: ctx.accounts.player_bpoly_ata.to_account_info(),
-                        to: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                        authority: ctx.accounts.player.to_account_info(),
+                        from: player_bpoly_ata.to_account_info(),
+                        to: bank_bpoly_ata.to_account_info(),
+                        authority: player_signer.to_account_info(),
                     },
                 );
                 token::transfer(cpi_ctx, amount)?;
@@ -516,11 +511,11 @@ fn resolve_governance_vote<'info>(
                 // Property loss handled via remaining_accounts in full impl
             } else {
                 let cpi_ctx = CpiContext::new_with_signer(
-                    ctx.accounts.token_program.to_account_info(),
+                    token_program.to_account_info(),
                     Transfer {
-                        from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                        to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                        authority: ctx.accounts.bank_vault.to_account_info(),
+                        from: bank_bpoly_ata.to_account_info(),
+                        to: player_bpoly_ata.to_account_info(),
+                        authority: bank_vault.to_account_info(),
                     },
                     signer_seeds,
                 );
@@ -533,11 +528,11 @@ fn resolve_governance_vote<'info>(
             // DAO Birthday Vote: all other players pay you 50 (simplified: receive from bank)
             let total = 50_000_000u64.saturating_mul(game.player_count.saturating_sub(1) as u64);
             let cpi_ctx = CpiContext::new_with_signer(
-                ctx.accounts.token_program.to_account_info(),
+                token_program.to_account_info(),
                 Transfer {
-                    from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                    to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                    authority: ctx.accounts.bank_vault.to_account_info(),
+                    from: bank_bpoly_ata.to_account_info(),
+                    to: player_bpoly_ata.to_account_info(),
+                    authority: bank_vault.to_account_info(),
                 },
                 signer_seeds,
             );
@@ -551,11 +546,11 @@ fn resolve_governance_vote<'info>(
             player.position = SPACE_DEFI_SUMMER;
             if old_pos > SPACE_DEFI_SUMMER {
                 let cpi_ctx = CpiContext::new_with_signer(
-                    ctx.accounts.token_program.to_account_info(),
+                    token_program.to_account_info(),
                     Transfer {
-                        from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                        to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                        authority: ctx.accounts.bank_vault.to_account_info(),
+                        from: bank_bpoly_ata.to_account_info(),
+                        to: player_bpoly_ata.to_account_info(),
+                        authority: bank_vault.to_account_info(),
                     },
                     signer_seeds,
                 );
@@ -567,11 +562,11 @@ fn resolve_governance_vote<'info>(
         13 => {
             // Regulatory Compliance Fine: pay 50 BPOLY
             let cpi_ctx = CpiContext::new(
-                ctx.accounts.token_program.to_account_info(),
+                token_program.to_account_info(),
                 Transfer {
-                    from: ctx.accounts.player_bpoly_ata.to_account_info(),
-                    to: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                    authority: ctx.accounts.player.to_account_info(),
+                    from: player_bpoly_ata.to_account_info(),
+                    to: bank_bpoly_ata.to_account_info(),
+                    authority: player_signer.to_account_info(),
                 },
             );
             token::transfer(cpi_ctx, 50_000_000)?;
@@ -584,11 +579,11 @@ fn resolve_governance_vote<'info>(
             let income = set_count.saturating_mul(20_000_000);
             if income > 0 {
                 let cpi_ctx = CpiContext::new_with_signer(
-                    ctx.accounts.token_program.to_account_info(),
+                    token_program.to_account_info(),
                     Transfer {
-                        from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                        to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                        authority: ctx.accounts.bank_vault.to_account_info(),
+                        from: bank_bpoly_ata.to_account_info(),
+                        to: player_bpoly_ata.to_account_info(),
+                        authority: bank_vault.to_account_info(),
                     },
                     signer_seeds,
                 );
@@ -609,11 +604,11 @@ fn resolve_governance_vote<'info>(
                 });
             } else {
                 let cpi_ctx = CpiContext::new_with_signer(
-                    ctx.accounts.token_program.to_account_info(),
+                    token_program.to_account_info(),
                     Transfer {
-                        from: ctx.accounts.bank_bpoly_ata.to_account_info(),
-                        to: ctx.accounts.player_bpoly_ata.to_account_info(),
-                        authority: ctx.accounts.bank_vault.to_account_info(),
+                        from: bank_bpoly_ata.to_account_info(),
+                        to: player_bpoly_ata.to_account_info(),
+                        authority: bank_vault.to_account_info(),
                     },
                     signer_seeds,
                 );

@@ -19,7 +19,7 @@ pub struct RejectTrade<'info> {
     #[account(
         seeds = [SEED_PLAYER_STATE, &game_id, recipient.key().as_ref()],
         bump = recipient_state.bump,
-        has_one = wallet @ BlockpolyError::InvalidTradeOffer,
+        constraint = recipient_state.wallet == recipient.key() @ BlockpolyError::InvalidTradeOffer,
     )]
     pub recipient_state: Account<'info, PlayerState>,
 

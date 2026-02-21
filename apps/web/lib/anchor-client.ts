@@ -1,3 +1,5 @@
+// web3-compat boundary — Anchor + @solana/web3.js v1 types are ONLY imported here.
+// All other modules import from @solana/kit or @solana/react-hooks.
 import { AnchorProvider, Program, Idl } from "@coral-xyz/anchor";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { PROGRAM_ID } from "./constants";

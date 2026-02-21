@@ -23,7 +23,7 @@ pub struct PayRent<'info> {
         mut,
         seeds = [SEED_PLAYER_STATE, &game_id, payer.key().as_ref()],
         bump = payer_state.bump,
-        has_one = wallet @ BlockpolyError::NotYourTurn,
+        constraint = payer_state.wallet == payer.key() @ BlockpolyError::NotYourTurn,
     )]
     pub payer_state: Account<'info, PlayerState>,
 
@@ -56,11 +56,11 @@ pub struct PayRent<'info> {
 pub fn handler(
     ctx: Context<PayRent>,
     game_id: [u8; 32],
-    /// For utilities: the dice roll total (passed in since VRF already resolved)
+    // For utilities: the dice roll total (passed in since VRF already resolved)
     dice_total: u8,
-    /// Number of bridges owned by the property owner (passed in to avoid loading extra accounts)
+    // Number of bridges owned by the property owner (passed in to avoid loading extra accounts)
     bridges_owned: u8,
-    /// Number of utilities owned by the owner
+    // Number of utilities owned by the owner
     utilities_owned: u8,
 ) -> Result<()> {
     let game = &mut ctx.accounts.game_state;

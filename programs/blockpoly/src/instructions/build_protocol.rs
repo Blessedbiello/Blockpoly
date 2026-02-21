@@ -22,7 +22,7 @@ pub struct BuildProtocol<'info> {
         mut,
         seeds = [SEED_PROPERTY_STATE, &game_id, &[space_index]],
         bump = property_state.bump,
-        has_one = owner @ BlockpolyError::NotPropertyOwner,
+        constraint = property_state.owner == player.key() @ BlockpolyError::NotPropertyOwner,
     )]
     pub property_state: Account<'info, PropertyState>,
 

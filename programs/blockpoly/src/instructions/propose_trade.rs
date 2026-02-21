@@ -19,7 +19,7 @@ pub struct ProposeTrade<'info> {
     #[account(
         seeds = [SEED_PLAYER_STATE, &game_id, proposer.key().as_ref()],
         bump = proposer_state.bump,
-        has_one = wallet @ BlockpolyError::NotPropertyOwner,
+        constraint = proposer_state.wallet == proposer.key() @ BlockpolyError::NotPropertyOwner,
     )]
     pub proposer_state: Account<'info, PlayerState>,
 
