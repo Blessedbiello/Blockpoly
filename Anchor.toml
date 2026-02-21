@@ -6,10 +6,10 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-blockpoly = "Bp1ypXF8ggBd7f6sWuXEsWs8iSU9L3dGAD9DPpAZ7bHm"
+blockpoly = "AicXQXhiHgzaxTXpbxYEriXSQdBRQNbqWgcMU1N57q9n"
 
 [programs.devnet]
-blockpoly = "Bp1ypXF8ggBd7f6sWuXEsWs8iSU9L3dGAD9DPpAZ7bHm"
+blockpoly = "AicXQXhiHgzaxTXpbxYEriXSQdBRQNbqWgcMU1N57q9n"
 
 [registry]
 url = "https://api.apr.dev"

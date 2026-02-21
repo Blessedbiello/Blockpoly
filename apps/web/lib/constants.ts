@@ -1,4 +1,4 @@
-export const PROGRAM_ID = "Bp1ypXF8ggBd7f6sWuXEsWs8iSU9L3dGAD9DPpAZ7bHm";
+export const PROGRAM_ID = "AicXQXhiHgzaxTXpbxYEriXSQdBRQNbqWgcMU1N57q9n";
 
 export const SEEDS = {
   GAME_STATE: "game_state",

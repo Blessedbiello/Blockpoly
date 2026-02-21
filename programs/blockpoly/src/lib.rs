@@ -9,7 +9,7 @@ pub mod state;
 
 use instructions::*;
 
-declare_id!("Bp1ypXF8ggBd7f6sWuXEsWs8iSU9L3dGAD9DPpAZ7bHm");
+declare_id!("AicXQXhiHgzaxTXpbxYEriXSQdBRQNbqWgcMU1N57q9n");
 
 #[program]
 pub mod blockpoly {

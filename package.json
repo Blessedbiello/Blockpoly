@@ -11,6 +11,7 @@
     "web": "pnpm --filter web dev"
   },
   "devDependencies": {
+    "@solana/spl-token": "^0.4.14",
     "@types/bn.js": "^5.1.6",
     "@types/mocha": "^10.0.10",
     "@types/node": "^22.10.7",
