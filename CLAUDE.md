@@ -25,7 +25,7 @@ Monorepo: `programs/` (Anchor/Rust) + `apps/web` (Next.js) + future `apps/mobile
 
 ## Program ID
 
-`Bp1ypXF8ggBd7f6sWuXEsWs8iSU9L3dGAD9DPpAZ7bHm` (devnet, localnet)
+`AicXQXhiHgzaxTXpbxYEriXSQdBRQNbqWgcMU1N57q9n` (devnet, localnet)
 
 ---
 
@@ -72,22 +72,30 @@ Monorepo: `programs/` (Anchor/Rust) + `apps/web` (Next.js) + future `apps/mobile
 
 ### Frontend (`apps/web/`)
 - [x] Next.js 14 App Router scaffold
-- [ ] Wallet adapter + providers
-- [ ] Anchor client setup
-- [ ] PDA helpers
-- [ ] Board data (TypeScript mirror of board.rs)
-- [ ] Lobby: create/join game
-- [ ] Game board: 11×11 CSS Grid
-- [ ] All game modals
-- [ ] WebSocket game state (useGame hook)
-- [ ] useGameActions hook
-- [ ] Session keys (ephemeral keypair)
+- [x] Wallet adapter + providers (`@solana/react-hooks`, kit-native)
+- [x] Anchor client setup (`lib/anchor-client.ts`, IDL loading)
+- [x] PDA helpers (`lib/pdas.ts`)
+- [x] Board data (`lib/board-data.ts`, TypeScript mirror of board.rs)
+- [x] Lobby: create/join game (`CreateGameForm`, `GameList` with on-chain fetch)
+- [x] Game board: 11×11 CSS Grid (`BoardCanvas`, `BoardSpace`, `PlayerToken`)
+- [x] All game modals (Buy, Auction, Build, Rent, RugPull, Mortgage, Trade, CardDraw, Winner)
+- [x] WebSocket game state (`useGame.ts` with Helius WS subscriptions)
+- [x] `useGameActions.ts` — all 23 instructions wired via Anchor + kit pipeline
+- [x] Session keys — `useSessionKey.ts` + `SessionKeyPanel` component
+- [x] `GameClient.tsx` — full game page wrapper
 
 ### Scripts (`scripts/`)
-- [ ] `mint-bpoly-token.ts`
+- [x] `mint-bpoly-token.ts` — BPOLY deployed at `6p3LtZQ9ko2oXRijE6Yb87re5PaoB9dybXxUkB4bGNb6`
 - [ ] `create-nft-collection.ts`
 - [ ] `generate-metadata.ts`
 - [ ] `upload-assets.ts`
+
+### Remaining / Stretch
+- [ ] Metaplex Core NFT minting in `buy_property` (currently placeholder pubkey)
+- [ ] Anchor integration test suite (`tests/blockpoly.ts`)
+- [ ] `create-nft-collection.ts` + metadata upload to Arweave
+- [ ] Vercel deployment
+- [ ] Session key program-level delegation (stretch — needs new program instruction)
 
 ---
 

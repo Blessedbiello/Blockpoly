@@ -13,6 +13,8 @@ import { PlayerList } from "@/components/game/PlayerList";
 import { EventLog } from "@/components/game/EventLog";
 import { DiceRoller } from "@/components/game/DiceRoller";
 
+import { SessionKeyPanel } from "@/components/game/SessionKeyPanel";
+
 // Modals
 import { BuyModal } from "@/components/game/BuyModal";
 import { AuctionModal } from "@/components/game/AuctionModal";
@@ -103,6 +105,7 @@ export function GameClient({ gameId }: GameClientProps) {
       {/* Right sidebar: actions panel */}
       <aside className="lg:w-72 flex flex-col gap-4">
         <GamePanel gameId={gameId} />
+        <SessionKeyPanel gameId={gameId} />
 
         {/* Build / Mortgage buttons always accessible during game */}
         {gameStatus === 1 && walletAddress && (
