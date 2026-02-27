@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Blockpoly",
+    "slug": "blockpoly",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": false,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1a1a2e"
+    },
+    "android": {
+      "package": "com.blockpoly.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#1a1a2e"
+      },
+      "permissions": []
+    },
+    "ios": {
+      "bundleIdentifier": "com.blockpoly.app",
+      "supportsTablet": false
+    },
+    "plugins": ["expo-crypto"]
+  }
+}
