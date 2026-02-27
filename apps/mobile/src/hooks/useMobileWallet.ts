@@ -51,17 +51,16 @@ export function useMobileWallet() {
 
       await transact(async (wallet) => {
         // Reauthorize with saved token
+        const identity = {
+          name: "Blockpoly",
+          uri: "https://blockpoly.app",
+          icon: "favicon.ico",
+        } as const;
+
         if (authToken) {
-          await wallet.reauthorize({ auth_token: authToken });
+          await wallet.reauthorize({ auth_token: authToken, identity });
         } else {
-          await wallet.authorize({
-            identity: {
-              name: "Blockpoly",
-              uri: "https://blockpoly.app",
-              icon: "favicon.ico",
-            },
-            cluster: "devnet",
-          });
+          await wallet.authorize({ identity, cluster: "devnet" });
         }
 
         const signedTxs = await wallet.signAndSendTransactions({
