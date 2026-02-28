@@ -63,9 +63,8 @@ pub mod blockpoly {
         ctx: Context<BuyProperty>,
         game_id: [u8; 32],
         space_index: u8,
-        nft_asset: Pubkey,
     ) -> Result<()> {
-        buy_property::handler(ctx, game_id, space_index, nft_asset)
+        buy_property::handler(ctx, game_id, space_index)
     }
 
     pub fn decline_buy(ctx: Context<DeclineBuy>, game_id: [u8; 32]) -> Result<()> {
@@ -215,5 +214,21 @@ pub mod blockpoly {
 
     pub fn claim_prize(ctx: Context<ClaimPrize>, game_id: [u8; 32]) -> Result<()> {
         claim_prize::handler(ctx, game_id)
+    }
+
+    // ── MagicBlock delegation ───────────────────────────────────────────────
+
+    pub fn delegate_game<'a, 'b, 'c, 'info>(
+        ctx: Context<'a, 'b, 'c, 'info, DelegateGame<'info>>,
+        game_id: [u8; 32],
+    ) -> Result<()> {
+        instructions::delegate_game::handler(ctx, game_id)
+    }
+
+    pub fn undelegate_game<'a, 'b, 'c, 'info>(
+        ctx: Context<'a, 'b, 'c, 'info, UndelegateGame<'info>>,
+        game_id: [u8; 32],
+    ) -> Result<()> {
+        instructions::undelegate_game::handler(ctx, game_id)
     }
 }

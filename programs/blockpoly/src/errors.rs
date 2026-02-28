@@ -86,4 +86,6 @@ pub enum BlockpolyError {
     AlreadyJoined,
     #[msg("Trade recipient not in this game")]
     RecipientNotInGame,
+    #[msg("NFT collection address mismatch")]
+    InvalidCollection,
 }

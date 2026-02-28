@@ -72,3 +72,6 @@ pub const LP_COST_RED: u64 = 150_000_000;
 pub const LP_COST_YELLOW: u64 = 150_000_000;
 pub const LP_COST_GREEN: u64 = 200_000_000;
 pub const LP_COST_DARK_BLUE: u64 = 200_000_000;
+
+/// NFT metadata base URI (property assets hosted on Arweave)
+pub const NFT_BASE_URI: &str = "https://arweave.net/blockpoly";

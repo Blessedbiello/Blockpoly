@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useGame } from "@/hooks/useGame";
 import { useGameActions } from "@/hooks/useGameActions";
 import { useGameStore } from "@/stores/gameStore";
 import { useWalletConnection } from "@solana/react-hooks";
+import { JUPITER_SPACE_INDEX } from "@/lib/constants";
 
 // Board + panel
 import { BoardCanvas } from "@/components/board/BoardCanvas";
@@ -25,6 +26,7 @@ import { MortgageModal } from "@/components/game/MortgageModal";
 import { TradeModal } from "@/components/game/TradeModal";
 import { CardDrawModal } from "@/components/game/CardDrawModal";
 import { WinnerModal } from "@/components/game/WinnerModal";
+import { JupiterSwapModal } from "@/components/game/JupiterSwapModal";
 
 interface GameClientProps {
   gameId: string;
@@ -51,6 +53,34 @@ export function GameClient({ gameId }: GameClientProps) {
   const gameStatus = store.gameState?.status ?? 0;
   const isWaiting = gameStatus === 0;
 
+  // Auto-delegate to MagicBlock on game start (graceful degradation).
+  const handleStartGame = useCallback(async () => {
+    await actions.startGame();
+    try {
+      await actions.delegateGame();
+    } catch (err) {
+      console.warn("MagicBlock delegation failed, continuing on Solana:", err);
+    }
+  }, [actions]);
+
+  // Auto-undelegate when game finishes.
+  useEffect(() => {
+    if (store.gameState?.status === 2 && store.isDelegated) {
+      actions.undelegateGame().catch(console.error);
+    }
+  }, [store.gameState?.status, store.isDelegated]);
+
+  // Trigger Jupiter swap modal when landing on space 31.
+  useEffect(() => {
+    if (!store.gameState || !walletAddress) return;
+    const currentWallet = store.gameState.players[store.gameState.currentPlayerIndex]?.toString();
+    if (currentWallet !== walletAddress) return;
+    const myState = store.playerStates.get(walletAddress);
+    if (myState?.position === JUPITER_SPACE_INDEX && store.gameState.turnPhase === 0) {
+      store.openModal("jupiter_prompt");
+    }
+  }, [store.gameState?.turnPhase, store.gameState?.currentPlayerIndex]);
+
   return (
     <div className="min-h-screen flex flex-col lg:flex-row gap-4 p-4">
       {/* Left sidebar */}
@@ -62,6 +92,13 @@ export function GameClient({ gameId }: GameClientProps) {
       {/* Center: board */}
       <main className="flex-1 flex flex-col items-center justify-center gap-4">
         <BoardCanvas gameId={gameId} />
+
+        {/* MagicBlock delegation indicator */}
+        {store.isDelegated && (
+          <div className="text-xs text-emerald-400 bg-emerald-900/30 border border-emerald-800 rounded px-3 py-1">
+            MagicBlock Turbo Mode Active
+          </div>
+        )}
 
         {/* Dice roller shown during active game when it's your turn */}
         {gameStatus === 1 && store.gameState?.turnPhase === 0 && (
@@ -82,7 +119,7 @@ export function GameClient({ gameId }: GameClientProps) {
           store.gameState?.host.toString() === walletAddress &&
           (store.gameState?.playerCount ?? 0) >= 2 && (
             <button
-              onClick={actions.startGame}
+              onClick={handleStartGame}
               className="btn-primary px-8 py-3 text-lg"
             >
               Start Game
@@ -115,19 +152,19 @@ export function GameClient({ gameId }: GameClientProps) {
               onClick={() => store.openModal("build")}
               className="btn-secondary w-full text-sm"
             >
-              🏗 Build / Improve
+              Build / Improve
             </button>
             <button
               onClick={() => store.openModal("mortgage")}
               className="btn-secondary w-full text-sm"
             >
-              📋 Mortgage
+              Mortgage
             </button>
             <button
               onClick={() => store.openModal("trade")}
               className="btn-secondary w-full text-sm"
             >
-              🤝 Trade
+              Trade
             </button>
           </div>
         )}
@@ -140,7 +177,7 @@ export function GameClient({ gameId }: GameClientProps) {
               onClick={actions.claimPrize}
               className="btn-primary w-full text-lg py-3"
             >
-              🏆 Claim Prize!
+              Claim Prize!
             </button>
           )}
       </aside>
@@ -175,6 +212,7 @@ export function GameClient({ gameId }: GameClientProps) {
       />
       <CardDrawModal />
       <WinnerModal />
+      <JupiterSwapModal />
     </div>
   );
 }

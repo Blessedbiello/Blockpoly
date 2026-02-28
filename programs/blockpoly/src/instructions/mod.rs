@@ -21,6 +21,8 @@ pub mod accept_trade;
 pub mod reject_trade;
 pub mod declare_bankruptcy;
 pub mod claim_prize;
+pub mod delegate_game;
+pub mod undelegate_game;
 
 pub use initialize_game::*;
 pub use join_game::*;
@@ -45,3 +47,5 @@ pub use accept_trade::*;
 pub use reject_trade::*;
 pub use declare_bankruptcy::*;
 pub use claim_prize::*;
+pub use delegate_game::*;
+pub use undelegate_game::*;

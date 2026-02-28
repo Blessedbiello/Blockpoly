@@ -3,10 +3,12 @@
 // Framework-kit-first provider setup (per solana-dev skill).
 // @solana/client + @solana/react-hooks handle wallet discovery and connection.
 // Anchor / web3.js v1 types stay isolated behind anchor-client.ts (web3-compat boundary).
+// WalletProvider from wallet-adapter-react added for co-signer support (mpl-core + Jupiter).
 
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 import { SolanaProvider } from "@solana/react-hooks";
 import { autoDiscover, createClient } from "@solana/client";
+import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 
@@ -35,21 +37,27 @@ const queryClient = new QueryClient({
 });
 
 export function Providers({ children }: { children: ReactNode }) {
+  const wallets = useMemo(() => [], []);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <SolanaProvider client={solanaClient}>
-        {children}
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: "#0f0f1a",
-              border: "1px solid #1a1a3e",
-              color: "#e2e8f0",
-            },
-          }}
-        />
-      </SolanaProvider>
-    </QueryClientProvider>
+    <ConnectionProvider endpoint={endpoint}>
+      <WalletProvider wallets={wallets} autoConnect>
+        <QueryClientProvider client={queryClient}>
+          <SolanaProvider client={solanaClient}>
+            {children}
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                style: {
+                  background: "#0f0f1a",
+                  border: "1px solid #1a1a3e",
+                  color: "#e2e8f0",
+                },
+              }}
+            />
+          </SolanaProvider>
+        </QueryClientProvider>
+      </WalletProvider>
+    </ConnectionProvider>
   );
 }
